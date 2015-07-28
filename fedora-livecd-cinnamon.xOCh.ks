@@ -25,7 +25,7 @@ part / --size=6144
 network --device=enp0s3 --onboot=yes --bootproto=dhcp
 
 # cinnamon configuration
-%post --log=/root/kickstart-post.log #<-- adding
+
 # create /etc/sysconfig/desktop (needed for installation)
 cat > /etc/sysconfig/desktop <<EOF
 PREFERRED=/usr/bin/cinnamon-session
@@ -38,21 +38,27 @@ desktop-file-edit --set-key=NoDisplay --set-value=true /usr/share/applications/y
  
 cat >> /etc/rc.d/init.d/livesys << EOF
 
-#<- adding...
 
+## copying configs and such into the ' mounted ' system
+## Copia archivos / configuraciones / etc EN 'montados' sistema
+
+%post --nochroot 
 
 dnf install --installroot=/mnt/sysimage gdm wget lynx -y;
 #dnf install -y --nogpgcheck http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-#dnf update --refresh -y
 
+## Acts on the  ' Installed '  System
+## actual archivos / configuraciones / etc EN 'installado' sistema, totale EN ' Installado ' sistema
+
+%post  
 
 #my own config
 # cinnamon themes :D
-#hash wget 2>/dev/null || { echo >&2 "No se encontro wget :("; exit 1;} #detecting wget; a ver si no se detiene todo...
+
 echo "The beggining of my own config"
 mkdir /tmp/theme/
 cd /tmp/theme/
-/usr/bin/curl http://cinnamon-spices.linuxmint.com/uploads/themes/WHVC-1OMQ-6474.zip -o "Dark-Line.zip"
+curl http://cinnamon-spices.linuxmint.com/uploads/themes/WHVC-1OMQ-6474.zip -o "Dark-Line.zip"
 chown liveuser:liveuser Dark-Line.zip
 chmod +r Dark-Line.zip
 unzip Dark-Line.zip
@@ -60,7 +66,10 @@ unzip Dark-Line.zip
 cp -r /tmp/theme/Dark-Line /usr/share/themes/
 gsettings set org.cinnamon.desktop.interface gtk-theme Dark-Line
 gsettings set org.cinnamon.theme name Dark-Line
-#rm -rf /tmp/theme
+  
+## puts the 'backup' copy  in /root of  ' installed ' system.
+## Pone el 'backup' copiar en / root del sistema 'instalado'
+cp -ra /tmp/theme /
 #end testing
  
 # set up gdm autologin
